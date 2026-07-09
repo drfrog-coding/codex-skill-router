@@ -11,6 +11,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts" / "build_skill_routing.py"
+INSTALL_SCRIPT = ROOT / "scripts" / "install_local.py"
 
 
 def main() -> None:
@@ -64,9 +65,32 @@ description: Demo plugin skill.
         assert "User provides a PDF or image file." in text
         assert "### demo:demo-skill" in text
         assert str(tmp) not in text
+        subprocess.run(
+            [
+                sys.executable,
+                str(INSTALL_SCRIPT),
+                "--agent",
+                "all",
+                "--codex-home",
+                str(home),
+                "--claude-home",
+                str(Path(tmp) / ".claude"),
+                "--openclaw-home",
+                str(Path(tmp) / ".openclaw"),
+                "--openclaw-workspace",
+                str(Path(tmp) / ".openclaw" / "workspace"),
+                "--skip-build",
+            ],
+            check=True,
+            cwd=ROOT,
+        )
+        assert (home / "AGENTS.md").is_file()
+        assert (Path(tmp) / ".claude" / "CLAUDE.md").is_file()
+        assert (Path(tmp) / ".openclaw" / "skills" / "skill-router" / "SKILL.md").is_file()
+        assert (Path(tmp) / ".openclaw" / "workspace" / "AGENTS.md").is_file()
+        assert (Path(tmp) / ".openclaw" / "workspace" / "TOOLS.md").is_file()
     print("ok")
 
 
 if __name__ == "__main__":
     main()
-

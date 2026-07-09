@@ -1,22 +1,24 @@
 # Codex Skill Router
 
-Codex skills and plugins are useful, but agents may miss them when the user does not explicitly name a skill. This project adds a small routing layer:
+Codex skills and plugins are useful, but agents may miss them when the user does not explicitly name a skill. Claude Code, OpenClaw, and similar agent tools have the same problem when skills must be invoked manually. This project adds a small routing layer:
 
 - scan installed `SKILL.md` files and plugin skills
 - extract trigger scenarios from skill descriptions and usage sections
 - generate a compact `skill-routing.md`
-- add one AGENTS rule that asks Codex to check that routing file before starting work
+- add a short agent-specific rule that asks the agent to check that routing file before starting work
 
-The generated routing file is an index, not a replacement for skills. After a route matches, Codex should still open the matched `SKILL.md` and follow its instructions.
+The generated routing file is an index, not a replacement for skills. After a route matches, the agent should still open the matched `SKILL.md` and follow its instructions.
 
 ## Files
 
 - `scripts/build_skill_routing.py`: build `~/.codex/skill-routing.md`
 - `scripts/test_build_skill_routing.py`: lightweight tests
-- `AGENTS_SNIPPET.md`: rules to paste into `~/.codex/AGENTS.md`
+- `AGENTS_SNIPPET.md`: legacy Codex rules to paste into `~/.codex/AGENTS.md`
+- `adapters/`: snippets for Codex, Claude Code, and OpenClaw
 - `examples/skill-routing-overrides.example.json`: optional manual routing overrides
 - `skills/skill-router/SKILL.md`: optional skill that formalizes the routing behavior
 - `docs/METHOD.md`: method and design notes
+- `docs/ADAPTERS.md`: per-agent installation notes
 
 ## Install
 
@@ -26,7 +28,19 @@ Clone the repo, then run:
 python3 scripts/install_local.py
 ```
 
-That command installs the optional `skill-router` skill, appends the AGENTS rule if needed, and generates `~/.codex/skill-routing.md`.
+That command installs the Codex adapter by default. To install multiple adapters:
+
+```bash
+python3 scripts/install_local.py --agent all
+```
+
+Supported adapters:
+
+- `codex`
+- `claude-code`
+- `openclaw`
+
+The install command copies the optional `skill-router` skill, appends the relevant agent rule if needed, and generates `~/.codex/skill-routing.md`.
 
 To only generate the routing file:
 
@@ -56,9 +70,18 @@ cp examples/skill-routing-overrides.example.json ~/.codex/skill-routing-override
 python3 scripts/build_skill_routing.py
 ```
 
-## Add To AGENTS.md
+To scan skills from other agent workspaces:
 
-`scripts/install_local.py` does this automatically. To do it manually, append the content of `AGENTS_SNIPPET.md` to `~/.codex/AGENTS.md`.
+```bash
+python3 scripts/build_skill_routing.py \
+  --skill-root ~/.claude/skills \
+  --skill-root ~/.openclaw/skills \
+  --skill-root ~/.openclaw/workspace/skills
+```
+
+## Add To Agent Instructions
+
+`scripts/install_local.py` does this automatically. To do it manually, use the snippets in `adapters/`.
 
 The short rule is:
 

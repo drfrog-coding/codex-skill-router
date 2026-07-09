@@ -8,4 +8,3 @@
 - If a matched route involves uploads, external APIs, paid services, credential changes, or system configuration, state that effect before using it unless the user already requested that action.
 - After selecting a route, open the matched `SKILL.md` and follow the skill's own instructions. The routing file is only an index.
 
-See `adapters/` for Claude Code and OpenClaw snippets.

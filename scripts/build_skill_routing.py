@@ -80,6 +80,18 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--overrides")
     parser.add_argument("--include-paths", action="store_true")
     parser.add_argument("--no-plugins", action="store_true")
+    parser.add_argument(
+        "--skill-root",
+        action="append",
+        default=[],
+        help="Additional directory to scan recursively for SKILL.md files. Can be repeated.",
+    )
+    parser.add_argument(
+        "--plugin-cache",
+        action="append",
+        default=[],
+        help="Additional plugin cache root shaped like marketplace/plugin/version. Can be repeated.",
+    )
     parser.add_argument("--max-items", type=int, default=8)
     return parser
 
@@ -95,7 +107,15 @@ def main() -> None:
         else codex_home / "skill-routing-overrides.json"
     )
 
-    routes = collect_routes(codex_home, include_plugins=not args.no_plugins, max_items=args.max_items)
+    skill_roots = [Path(value).expanduser().resolve() for value in args.skill_root]
+    plugin_caches = [Path(value).expanduser().resolve() for value in args.plugin_cache]
+    routes = collect_routes(
+        codex_home,
+        include_plugins=not args.no_plugins,
+        max_items=args.max_items,
+        skill_roots=skill_roots,
+        plugin_caches=plugin_caches,
+    )
     overrides = load_overrides(overrides_path)
     routes = merge_overrides(routes, overrides)
     markdown = render_markdown(routes, include_paths=args.include_paths)
@@ -105,10 +125,22 @@ def main() -> None:
     print(f"Routes: {len(routes)}")
 
 
-def collect_routes(codex_home: Path, *, include_plugins: bool, max_items: int) -> list[SkillRoute]:
-    skill_files = list(find_local_skill_files(codex_home / "skills"))
+def collect_routes(
+    codex_home: Path,
+    *,
+    include_plugins: bool,
+    max_items: int,
+    skill_roots: list[Path] | None = None,
+    plugin_caches: list[Path] | None = None,
+) -> list[SkillRoute]:
+    local_roots = [codex_home / "skills", *(skill_roots or [])]
+    skill_files: list[Path] = []
+    for root in local_roots:
+        skill_files.extend(find_local_skill_files(root))
     if include_plugins:
-        skill_files.extend(find_plugin_skill_files(codex_home / "plugins" / "cache"))
+        cache_roots = [codex_home / "plugins" / "cache", *(plugin_caches or [])]
+        for root in cache_roots:
+            skill_files.extend(find_plugin_skill_files(root))
 
     seen: set[tuple[str, str]] = set()
     routes: list[SkillRoute] = []
