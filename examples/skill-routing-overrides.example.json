@@ -1,0 +1,39 @@
+{
+  "skills": {
+    "mineru": {
+      "priority": "high",
+      "use_when": [
+        "User provides a PDF, Word, PowerPoint, spreadsheet, image, local file path, or document URL.",
+        "User asks to parse, read, extract text from, convert, OCR, or summarize a file."
+      ],
+      "ask_user_when": [
+        "The document appears sensitive and would be uploaded to mineru.net."
+      ]
+    },
+    "humanizer-zh": {
+      "priority": "high",
+      "use_when": [
+        "User asks to polish Chinese prose, reduce AI tone, revise reports, revise academic text, or make writing sound natural."
+      ],
+      "combine_with": [
+        "stop-slop"
+      ]
+    },
+    "freecad-mcp": {
+      "priority": "high",
+      "use_when": [
+        "User asks to control FreeCAD, create CAD geometry, export STEP/STL, or run FEM workflows."
+      ],
+      "ask_user_when": [
+        "Missing dimensions or material constraints would change the model structure."
+      ]
+    },
+    "codex-images2": {
+      "priority": "medium",
+      "use_when": [
+        "User asks to generate or edit images through GPT Image 2 from Codex."
+      ]
+    }
+  }
+}
+
