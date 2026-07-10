@@ -65,12 +65,13 @@ description: Demo plugin skill.
         assert "User provides a PDF or image file." in text
         assert "### demo:demo-skill" in text
         assert str(tmp) not in text
+        project = Path(tmp) / "project"
+        project.mkdir()
         subprocess.run(
             [
                 sys.executable,
                 str(INSTALL_SCRIPT),
-                "--agent",
-                "all",
+                "--list-agents",
                 "--codex-home",
                 str(home),
                 "--claude-home",
@@ -79,6 +80,61 @@ description: Demo plugin skill.
                 str(Path(tmp) / ".openclaw"),
                 "--openclaw-workspace",
                 str(Path(tmp) / ".openclaw" / "workspace"),
+                "--gemini-home",
+                str(Path(tmp) / ".gemini"),
+                "--opencode-home",
+                str(Path(tmp) / ".config" / "opencode"),
+                "--cline-rules-home",
+                str(Path(tmp) / "Documents" / "Cline" / "Rules"),
+                "--roo-home",
+                str(Path(tmp) / ".roo"),
+                "--project-root",
+                str(project),
+                "--skip-build",
+            ],
+            check=True,
+            cwd=ROOT,
+        )
+        project_adapter_without_marker = subprocess.run(
+            [
+                sys.executable,
+                str(INSTALL_SCRIPT),
+                "--agent",
+                "cursor",
+                "--skip-build",
+            ],
+            cwd=project,
+            text=True,
+            capture_output=True,
+        )
+        assert project_adapter_without_marker.returncode != 0
+        assert "requires --project-root" in (
+            project_adapter_without_marker.stdout + project_adapter_without_marker.stderr
+        )
+        subprocess.run(
+            [
+                sys.executable,
+                str(INSTALL_SCRIPT),
+                "--agent",
+                "all-known",
+                "--codex-home",
+                str(home),
+                "--claude-home",
+                str(Path(tmp) / ".claude"),
+                "--openclaw-home",
+                str(Path(tmp) / ".openclaw"),
+                "--openclaw-workspace",
+                str(Path(tmp) / ".openclaw" / "workspace"),
+                "--gemini-home",
+                str(Path(tmp) / ".gemini"),
+                "--opencode-home",
+                str(Path(tmp) / ".config" / "opencode"),
+                "--cline-rules-home",
+                str(Path(tmp) / "Documents" / "Cline" / "Rules"),
+                "--roo-home",
+                str(Path(tmp) / ".roo"),
+                "--project-root",
+                str(project),
                 "--skip-build",
             ],
             check=True,
@@ -89,6 +145,17 @@ description: Demo plugin skill.
         assert (Path(tmp) / ".openclaw" / "skills" / "skill-router" / "SKILL.md").is_file()
         assert (Path(tmp) / ".openclaw" / "workspace" / "AGENTS.md").is_file()
         assert (Path(tmp) / ".openclaw" / "workspace" / "TOOLS.md").is_file()
+        assert (Path(tmp) / ".gemini" / "GEMINI.md").is_file()
+        assert (Path(tmp) / ".config" / "opencode" / "AGENTS.md").is_file()
+        assert (Path(tmp) / ".config" / "opencode" / "skills" / "skill-router" / "SKILL.md").is_file()
+        assert (Path(tmp) / "Documents" / "Cline" / "Rules" / "skill-routing.md").is_file()
+        assert (Path(tmp) / ".roo" / "rules" / "skill-routing.md").is_file()
+        assert (project / ".clinerules" / "00-skill-routing.md").is_file()
+        assert (project / ".roo" / "rules" / "00-skill-routing.md").is_file()
+        assert (project / ".cursor" / "rules" / "skill-routing.mdc").is_file()
+        assert (project / ".continue" / "rules" / "00-skill-routing.md").is_file()
+        assert (project / "CONVENTIONS.md").is_file()
+        assert (project / ".devin" / "rules" / "00-skill-routing.md").is_file()
     print("ok")
 
 

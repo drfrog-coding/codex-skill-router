@@ -1,6 +1,6 @@
 # Codex Skill Router
 
-Codex skills and plugins are useful, but agents may miss them when the user does not explicitly name a skill. Claude Code, OpenClaw, and similar agent tools have the same problem when skills must be invoked manually. This project adds a small routing layer:
+Codex skills and plugins are useful, but agents may miss them when the user does not explicitly name a skill. Claude Code, OpenClaw, Gemini CLI, OpenCode, Cursor, Cline, Roo Code, Continue, aider, Windsurf/Cascade, and similar tools have the same problem when rules or skills depend on manual invocation. This project adds a small routing layer:
 
 - scan installed `SKILL.md` files and plugin skills
 - extract trigger scenarios from skill descriptions and usage sections
@@ -14,7 +14,7 @@ The generated routing file is an index, not a replacement for skills. After a ro
 - `scripts/build_skill_routing.py`: build `~/.codex/skill-routing.md`
 - `scripts/test_build_skill_routing.py`: lightweight tests
 - `AGENTS_SNIPPET.md`: legacy Codex rules to paste into `~/.codex/AGENTS.md`
-- `adapters/`: snippets for Codex, Claude Code, and OpenClaw
+- `adapters/`: snippets for Codex and other agent tools
 - `examples/skill-routing-overrides.example.json`: optional manual routing overrides
 - `skills/skill-router/SKILL.md`: optional skill that formalizes the routing behavior
 - `docs/METHOD.md`: method and design notes
@@ -28,19 +28,41 @@ Clone the repo, then run:
 python3 scripts/install_local.py
 ```
 
-That command installs the Codex adapter by default. To install multiple adapters:
+That command runs `--agent auto` by default. `auto` detects installed tools and existing project rule directories, then installs only the matching adapters.
+
+To see what will match on the current machine and project:
 
 ```bash
-python3 scripts/install_local.py --agent all
+python3 scripts/install_local.py --list-agents
 ```
 
-Supported adapters:
+To install every known global adapter, plus project adapters for an explicit project:
+
+```bash
+python3 scripts/install_local.py --agent all-known --project-root /path/to/project
+```
+
+`--agent all` is a deprecated compatibility alias for `--agent all-known`. New usage should prefer `auto`, `--list-agents`, explicit adapter names, or `all-known` when you deliberately want every known adapter.
+
+Supported adapters currently include:
 
 - `codex`
 - `claude-code`
 - `openclaw`
+- `gemini-cli`
+- `opencode`
+- `cline`
+- `roo-code`
+- `cline-project`
+- `roo-code-project`
+- `cursor`
+- `continue`
+- `aider`
+- `windsurf`
 
 The install command copies the optional `skill-router` skill, appends the relevant agent rule if needed, and generates `~/.codex/skill-routing.md`.
+
+Project-scoped adapters write into the project you pass with `--project-root`. In `auto` mode, they are installed only when that project already has the corresponding rule directory or marker file.
 
 To only generate the routing file:
 
